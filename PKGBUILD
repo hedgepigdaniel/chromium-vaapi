@@ -9,16 +9,16 @@
 ## -- Build options -- ##
 #########################
 
-_use_clang=0     # Use clang compiler (downloaded binaries from google). Results in faster build and smaller chromium.
-_use_ccache=0    # Use ccache when build.
+_use_clang=1     # Use clang compiler (downloaded binaries from google). Results in faster build and smaller chromium.
+_use_ccache=1    # Use ccache when build.
 _use_pax=0       # Set 1 to change PaX permisions in executables NOTE: only use if use PaX environment.
 _debug_mode=0    # Build in debug mode.
-_enable_vaapi=0  # Patch for VAAPI HW acceleration NOTE: don't work in some graphic cards, for example, NVIDIA
+_enable_vaapi=1  # Patch for VAAPI HW acceleration NOTE: don't work in some graphic cards, for example, NVIDIA
 
 ##############################################
 ## -- Package and components information -- ##
 ##############################################
-pkgname=chromium-dev
+pkgname=chromium-vaapi
 pkgver=58.0.3029.19
 _launcher_ver=3
 pkgrel=1
@@ -67,7 +67,7 @@ optdepends=('libva-vdpau-driver-chromium: HW video acceleration for NVIDIA users
             'libva-intel-driver: HW video acceleration for intel users'
             #
             'pepper-flash: PPAPI Flash Player'
-            'chromium-widevine-dev: Widevine plugin (eg: Netflix) (Dev Channel)'
+            'chromium-widevine: Widevine plugin (eg: Netflix) (Dev Channel)'
             #
             'kdialog: Needed for file dialogs in KF5'
             #
@@ -81,7 +81,7 @@ optdepends=('libva-vdpau-driver-chromium: HW video acceleration for NVIDIA users
 source=( #"https://gsdview.appspot.com/chromium-browser-official/chromium-${pkgver}.tar.xz"
         "https://commondatastorage.googleapis.com/chromium-browser-official/chromium-${pkgver}.tar.xz"
         "chromium-launcher-${_launcher_ver}.tar.gz::https://github.com/foutrelis/chromium-launcher/archive/v${_launcher_ver}.tar.gz"
-        'chromium-dev.svg'
+        'chromium-vaapi.svg'
         'BUILD.gn'
         # Patch form Gentoo
         'https://raw.githubusercontent.com/gentoo/gentoo/master/www-client/chromium/files/chromium-system-ffmpeg-r4.patch'
@@ -111,7 +111,7 @@ sha256sums=( #"$(curl -sL https://gsdview.appspot.com/chromium-browser-official/
             '0d537830944814fe0854f834b5dc41dc5fc2428f77b2ad61d4a5e76b0fe99880'
             )
 options=('!strip')
-install=chromium-dev.install
+install=chromium-vaapi.install
 
 ################################################
 ## -- Don't touch anything below this line -- ##
@@ -380,11 +380,11 @@ prepare() {
 
   cd "chromium-${pkgver}"
 
-  # Fix to save configuration in ~/.config/chromium-dev.
-  sed -e 's|filename = "chromium-browser"|filename = "chromium-dev"|' \
-      -e 's|confdir = "chromium"|confdir = "chromium-dev"|' \
+  # Fix to save configuration in ~/.config/chromium-vaapi.
+  sed -e 's|filename = "chromium-browser"|filename = "chromium-vaapi"|' \
+      -e 's|confdir = "chromium"|confdir = "chromium-vaapi"|' \
       -i chrome/BUILD.gn
-  sed -e 's|config_dir.Append("chromium")|config_dir.Append("chromium-dev")|' \
+  sed -e 's|config_dir.Append("chromium")|config_dir.Append("chromium-vaapi")|' \
       -i chrome/common/chrome_paths_linux.cc
 
   msg2 "Patching the sources"
@@ -494,7 +494,7 @@ _set_gcc() {
 build() {
 
   msg2 "Build the Launcher"
-  make -C "chromium-launcher-${_launcher_ver}" CHROMIUM_SUFFIX="-dev" PREFIX=/usr GTK=3
+  make -C "chromium-launcher-${_launcher_ver}" CHROMIUM_SUFFIX="-vaapi" PREFIX=/usr GTK=3
 
   cd "chromium-${pkgver}"
 
@@ -520,8 +520,8 @@ build() {
 
 package() {
   # Install launcher.
-  make -C "chromium-launcher-${_launcher_ver}" CHROMIUM_SUFFIX="-dev" PREFIX=/usr DESTDIR="${pkgdir}" GTK=3 install-strip
-  install -Dm644 "chromium-launcher-${_launcher_ver}/LICENSE" "${pkgdir}/usr/share/licenses/chromium-dev/LICENSE.launcher"
+  make -C "chromium-launcher-${_launcher_ver}" CHROMIUM_SUFFIX="-vaapi" PREFIX=/usr DESTDIR="${pkgdir}" GTK=3 install-strip
+  install -Dm644 "chromium-launcher-${_launcher_ver}/LICENSE" "${pkgdir}/usr/share/licenses/chromium-vaapi/LICENSE.launcher"
 
   pushd "chromium-${pkgver}/out/Release" &> /dev/null
 
@@ -531,17 +531,17 @@ package() {
   fi
 
   # Install binaries.
-  install -Dm755 chrome "${pkgdir}/usr/lib/chromium-dev/chromium-dev"
-  install -Dm644 chrome.1 "${pkgdir}/usr/share/man/man1/chromium-dev.1"
-  install -Dm4755 chrome_sandbox "${pkgdir}/usr/lib/chromium-dev/chrome-sandbox"
-  install -Dm755 chromedriver "${pkgdir}/usr/lib/chromium-dev/chromedriver"
-  ln -sf /usr/lib/chromium-dev/chromedriver "${pkgdir}/usr/bin/chromedriver-dev"
+  install -Dm755 chrome "${pkgdir}/usr/lib/chromium-vaapi/chromium-vaapi"
+  install -Dm644 chrome.1 "${pkgdir}/usr/share/man/man1/chromium-vaapi.1"
+  install -Dm4755 chrome_sandbox "${pkgdir}/usr/lib/chromium-vaapi/chrome-sandbox"
+  install -Dm755 chromedriver "${pkgdir}/usr/lib/chromium-vaapi/chromedriver"
+  ln -sf /usr/lib/chromium-vaapi/chromedriver "${pkgdir}/usr/bin/chromedriver-vaapi"
 
   # Install libs.
-  install -Dm755 libclearkeycdm.so "${pkgdir}/usr/lib/chromium-dev/libclearkeycdm.so"
-  install -Dm755 libwidevinecdmadapter.so "${pkgdir}/usr/lib/chromium-dev/libwidevinecdmadapter.so"
-  install -Dm644 natives_blob.bin "${pkgdir}/usr/lib/chromium-dev/natives_blob.bin"
-  install -Dm644 snapshot_blob.bin "${pkgdir}/usr/lib/chromium-dev/snapshot_blob.bin"
+  install -Dm755 libclearkeycdm.so "${pkgdir}/usr/lib/chromium-vaapi/libclearkeycdm.so"
+  install -Dm755 libwidevinecdmadapter.so "${pkgdir}/usr/lib/chromium-vaapi/libwidevinecdmadapter.so"
+  install -Dm644 natives_blob.bin "${pkgdir}/usr/lib/chromium-vaapi/natives_blob.bin"
+  install -Dm644 snapshot_blob.bin "${pkgdir}/usr/lib/chromium-vaapi/snapshot_blob.bin"
 
   # Install Resources.
   _resources=(
@@ -556,12 +556,12 @@ package() {
     'headless_lib'
   )
   for i in "${_resources[@]}"; do
-    install -Dm644 "${i}.pak" "${pkgdir}/usr/lib/chromium-dev/${i}.pak"
+    install -Dm644 "${i}.pak" "${pkgdir}/usr/lib/chromium-/${i}.pak"
   done
-  find resources -type f -name "*" -exec install -Dm644 '{}' "${pkgdir}/usr/lib/chromium-dev/{}" \;
+  find resources -type f -name "*" -exec install -Dm644 '{}' "${pkgdir}/usr/lib/chromium-vaapi/{}" \;
 
   # Install locales.
-  find locales -type f -name "*.pak" -exec install -Dm644 '{}' "${pkgdir}/usr/lib/chromium-dev/{}" \;
+  find locales -type f -name "*.pak" -exec install -Dm644 '{}' "${pkgdir}/usr/lib/chromium-vaapi/{}" \;
 
   # Install icons.
   for _size in 16 22 24 32 48 128 256; do
@@ -569,40 +569,40 @@ package() {
       16|32) _branding="${srcdir}/chromium-${pkgver}/chrome/app/theme/default_100_percent/chromium" ;;
       *) _branding="${srcdir}/chromium-${pkgver}/chrome/app/theme/chromium" ;;
     esac
-    install -Dm644 "${_branding}/product_logo_${_size}.png" "${pkgdir}/usr/share/icons/hicolor/${_size}x${_size}/apps/chromium-dev.png"
+    install -Dm644 "${_branding}/product_logo_${_size}.png" "${pkgdir}/usr/share/icons/hicolor/${_size}x${_size}/apps/chromium-vaapi.png"
   done
 
   # Install NaCL stuff if is detected.
   if [ "${_build_nacl}" = "1" ]; then
-    install -Dm755 nacl_helper "${pkgdir}/usr/lib/chromium-dev/nacl_helper"
-    install -Dm755 nacl_helper_bootstrap "${pkgdir}/usr/lib/chromium-dev/nacl_helper_bootstrap"
-    install -Dm755 nacl_helper_nonsfi "${pkgdir}/usr/lib/chromium-dev/nacl_helper_nonsfi"
-    install -Dm755 nacl_irt_x86_64.nexe "${pkgdir}/usr/lib/chromium-dev/nacl_irt_x86_64.nexe"
-    install -Dm644 icudtl.dat "${pkgdir}/usr/lib/chromium-dev/icudtl.dat"
+    install -Dm755 nacl_helper "${pkgdir}/usr/lib/chromium-vaapi/nacl_helper"
+    install -Dm755 nacl_helper_bootstrap "${pkgdir}/usr/lib/chromium-vaapi/nacl_helper_bootstrap"
+    install -Dm755 nacl_helper_nonsfi "${pkgdir}/usr/lib/chromium-vaapi/nacl_helper_nonsfi"
+    install -Dm755 nacl_irt_x86_64.nexe "${pkgdir}/usr/lib/chromium-vaapi/nacl_irt_x86_64.nexe"
+    install -Dm644 icudtl.dat "${pkgdir}/usr/lib/chromium-vaapi/icudtl.dat"
   fi
 
   popd &> /dev/null
 
   # Install some external files.
-  install -Dm644 "chromium-${pkgver}/chrome/installer/linux/common/desktop.template" "${pkgdir}/usr/share/applications/chromium-dev.desktop"
-  sed -e 's|@@MENUNAME@@|Chromium-dev|g' \
-      -e 's|@@USR_BIN_SYMLINK_NAME@@|chromium-dev|g' \
-      -e 's|@@PACKAGE@@|chromium-dev|g' \
-      -i "${pkgdir}/usr/share/applications/chromium-dev.desktop"
-  install -Dm644 chromium-dev.svg "${pkgdir}/usr/share/icons/hicolor/scalable/apps/chromium-dev.svg"
-  install -Dm644 "chromium-${pkgver}/LICENSE" "${pkgdir}/usr/share/licenses/chromium-dev/LICENSE"
+  install -Dm644 "chromium-${pkgver}/chrome/installer/linux/common/desktop.template" "${pkgdir}/usr/share/applications/chromium-vaapi.desktop"
+  sed -e 's|@@MENUNAME@@|Chromium-vaapi|g' \
+      -e 's|@@USR_BIN_SYMLINK_NAME@@|chromium-vaapi|g' \
+      -e 's|@@PACKAGE@@|chromium-vaapi|g' \
+      -i "${pkgdir}/usr/share/applications/chromium-vaapi.desktop"
+  install -Dm644 chromium-vaapi.svg "${pkgdir}/usr/share/icons/hicolor/scalable/apps/chromium-vaapi.svg"
+  install -Dm644 "chromium-${pkgver}/LICENSE" "${pkgdir}/usr/share/licenses/chromium-vaapi/LICENSE"
 
   if [ "${_debug_mode}" = "0" ]; then
     # Manually strip binaries so that 'nacl_irt_*.nexe' is left intact.
     if [ "${_build_nacl}" = "1" ]; then
-      strip $STRIP_BINARIES "${pkgdir}/usr/lib/chromium-dev/"nacl_helper{,_bootstrap,_nonsfi}
+      strip $STRIP_BINARIES "${pkgdir}/usr/lib/chromium-vaapi/"nacl_helper{,_bootstrap,_nonsfi}
     fi
-    strip $STRIP_BINARIES "${pkgdir}/usr/lib/chromium-dev/"{chromium-dev,chrome-sandbox,chromedriver}
-    strip $STRIP_SHARED "${pkgdir}/usr/lib/chromium-dev/"lib{widevinecdmadapter,clearkeycdm}.so
+    strip $STRIP_BINARIES "${pkgdir}/usr/lib/chromium-vaapi/"{chromium-vaapi,chrome-sandbox,chromedriver}
+    strip $STRIP_SHARED "${pkgdir}/usr/lib/chromium-vaapi/"lib{widevinecdmadapter,clearkeycdm}.so
   fi
 
   # Try to fix libpng errors. (second attemp)
-  for _path in "${pkgdir}/usr/lib/chromium-dev/resources/inspector/Images"; do
+  for _path in "${pkgdir}/usr/lib/chromium-vaapi/resources/inspector/Images"; do
     pushd "${_path}" &> /dev/null
     export IFS=$'\n'
     for i in $(find . -name '*.png' -type f); do
