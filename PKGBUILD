@@ -19,7 +19,7 @@ _enable_vaapi=1  # Patch for VAAPI HW acceleration NOTE: don't work in some grap
 ## -- Package and components information -- ##
 ##############################################
 pkgname=chromium-vaapi
-pkgver=58.0.3029.19
+pkgver=58.0.3029.81
 _launcher_ver=3
 pkgrel=1
 pkgdesc="The open-source project behind Google Chrome (Dev Channel)"
