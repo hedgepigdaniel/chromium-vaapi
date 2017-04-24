@@ -556,7 +556,7 @@ package() {
     'headless_lib'
   )
   for i in "${_resources[@]}"; do
-    install -Dm644 "${i}.pak" "${pkgdir}/usr/lib/chromium-/${i}.pak"
+    install -Dm644 "${i}.pak" "${pkgdir}/usr/lib/chromium-vaapi/${i}.pak"
   done
   find resources -type f -name "*" -exec install -Dm644 '{}' "${pkgdir}/usr/lib/chromium-vaapi/{}" \;
 
