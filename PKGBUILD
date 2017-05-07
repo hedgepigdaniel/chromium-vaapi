@@ -19,7 +19,7 @@ _enable_vaapi=1  # Patch for VAAPI HW acceleration NOTE: don't work in some grap
 ## -- Package and components information -- ##
 ##############################################
 pkgname=chromium-vaapi
-pkgver=58.0.3029.81
+pkgver=58.0.3029.96
 _launcher_ver=3
 pkgrel=1
 pkgdesc="The open-source project behind Google Chrome (Dev Channel)"
@@ -94,20 +94,17 @@ source=( #"https://gsdview.appspot.com/chromium-browser-official/chromium-${pkgv
         # Patch from crbug (chromium bugtracker)
         'chromium-widevine-r1.patch'
         )
-sha256sums=( #"$(curl -sL https://gsdview.appspot.com/chromium-browser-official/chromium-55.0.2873.0.tar.xz.hashes | grep sha256 | cut -d ' ' -f3)"
-            "$(curl -sL https://commondatastorage.googleapis.com/chromium-browser-official/chromium-${pkgver}.tar.xz.hashes | grep sha256 | cut -d ' ' -f3)"
+sha256sums=('5d38fd7ad3b58bd09da8ff05f12354e94c2ad1bb203527a632b72cc3ff4a5181'
             '8b01fb4efe58146279858a754d90b49e5a38c9a0b36a1f84cbb7d12f92b84c28'
             'dd2b5c4191e468972b5ea8ddb4fa2e2fa3c2c94c79fc06645d0efc0e63ce7ee1'
             'c7d9974834fc3803b5f1a1d310ff391306964caaabc807a62f8e5c3d38526ee6'
-            # Patch form Gentoo
             'e3c474dbf3822a0be50695683bd8a2c9dfc82d41c1524a20b4581883c0c88986'
             '64d743c78183c302c42d1f289863e34c74832fca57443833e46a0a3157e2b5de'
-            # Misc Patches
             'c958fa44a24f5a5f6ab126a2497da324a9a3e21365a872051e9e141c39d09598'
             '4c08d787b069585db652a5920432eb9aab7572422fe4f49f49a60157060ee205'
             '95ba939b9372e533ecbcc9ca034f3e9fc6621d3bddabb57c4d092ea69fa6c840'
             'fef17ee6b80b9c60e4579ec4afec72fedb6ab1807ecc5903ab6aa2ccbb9fc8b0'
-            # Patch from crbug (chromium bugtracker)
+            '0d537830944814fe0854f834b5dc41dc5fc2428f77b2ad61d4a5e76b0fe99880')
             '0d537830944814fe0854f834b5dc41dc5fc2428f77b2ad61d4a5e76b0fe99880'
             )
 options=('!strip')
